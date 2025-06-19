@@ -1,7 +1,10 @@
-const express = require('express')
+const express = require('express');
+const bcrypt = require('bcryptjs');
 const app = express()
 const port = 3000
-const pool = require('./db');
+const pool = require('.');
+
+app.use(express.json());
 
 app.get('/', async (req, res) => {
   try {
