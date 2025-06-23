@@ -4,6 +4,7 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 
+
 app.use('/auth', require('./routes/auth'));
 app.use('/products', require('./routes/products'));
 app.use('/cart', require('./routes/cart'));
