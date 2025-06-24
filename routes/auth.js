@@ -4,6 +4,38 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../db');
 
+/** 
+ * @swagger
+ * /api/auth/register:
+ *  post:
+ *    summary: Register a new customer
+ *    tags:
+ *      - Auth
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            required:
+ *              -name
+ *              -password
+ *            properties:
+ *              name:
+ *                type: string
+ *                example: kyle
+ *              password:
+ *                type: string
+ *                example: mySecret123
+ *    responses:
+ *      201:
+ *        description: Customer registered successfully
+ *      400:
+ *        description: Customer already exists
+ *      500:
+ *        description: Server error   
+*/
+
 router.post('/register', async (req, res) => {
   const { name, password } = req.body;
   try {
@@ -18,6 +50,49 @@ router.post('/register', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
+/**
+ * @swagger
+ * /api/auth/login:
+ *  post:
+ *    summary: Login a customer and receive a JWT token
+ *    tags:
+ *      - Auth
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            required:
+ *              - name
+ *              - password
+ *            properties:
+ *              name:
+ *                type: string
+ *                example: bob
+ *              password:
+ *                type: string
+ *                example: passWord123
+ *    responses:
+ *      200:
+ *        description: Login successful
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                message:
+ *                  type: string
+ *                  example: Login successful
+ *                token:
+ *                  type: string
+ *                  example: eyJkhdGFHFHhfhhHFHH....
+ *      400:
+ *        description: Invalid name or password
+ *      500:
+ *        description: Server error
+ */
 
 router.post('/login', async (req, res) => {
   const { name, password } = req.body;
