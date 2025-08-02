@@ -3,6 +3,8 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../../model/db');
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 /** 
  * @swagger
@@ -110,5 +112,65 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
+/**
+ * @swagger
+ * /api/auth/google-login:
+ *   post:
+ *     summary: Google OAuth login
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 example: eyJhbGciOiJSUzI1NiIsImtpZCI...
+ *     responses:
+ *       200:
+ *         description: Google login successful
+ *       401:
+ *         description: Invalid Google token
+ */
+
+
+router.post('/google-login', async (req, res) => {
+  const { token } = req.body;
+
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name } = payload;
+
+    let user = await pool.query('SELECT * FFROM customers WHERE google_id = $1', [googleId]);
+
+    if (user.rows.length == 0) {
+      await pool.query('INSERT INTO customers (name, email, google_id) VALUES ($1, $2, $3)', [name, email, googleId]);
+
+      user = await pool.query('SELECT * FROM customers WHERE google_id = $1', [googleId]);
+    }
+
+    const customer = user.rows[0];
+
+    const jwtToken = jwt.sign(
+      { id: customer.id, name: customer.name },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h'}
+    );
+
+    res.json({ message: 'Google login successful', token: jwtToken }); 
+
+  } catch (err) {
+    console.error(err);
+    res.status(401).json({ error: 'Invalid Google token' });
+  }
+})
 
 module.exports = router;

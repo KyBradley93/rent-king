@@ -116,4 +116,58 @@ router.post('/items', authenticateCustomer, async (req, res) => {
   res.status(201).json({ message: 'Item added to cart' });
 });
 
+/**
+ * @swagger
+ * /api/cart/items:
+ *   delete:
+ *     summary: Delete a furniture item to the authenticated customer's cart
+ *     tags:
+ *       - Cart
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - furniture_item_id
+ *             properties:
+ *               furniture_item_id:
+ *                 type: integer
+ *                 example: 10
+ *     responses:
+ *       200:
+ *         description: Item deleted in cart
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Item deleted in cart
+ */
+
+
+router.delete('/items', authenticateCustomer, async (req, res) => {
+  const { furniture_item_id } = req.body;
+
+  // Ensure cart exists
+  let cartResult = await pool.query('SELECT * FROM cart WHERE customer_id = $1', [req.customer.id]);
+  let cartId;
+  if (cartResult.rows.length === 0) {
+    res.status(400).send({ error: 'No Cart Found' });
+  } else {
+    cartId = cartResult.rows[0].id;
+  }
+
+  await pool.query(
+     'DELETE FROM cart_items WHERE cart_id = $1 AND furniture_item_id = $2',
+    [cartId, furniture_item_id]
+  );
+  res.status(200).json({ message: 'Item deletd from cart' });
+});
+
 module.exports = router;
