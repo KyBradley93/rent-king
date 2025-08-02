@@ -46,12 +46,13 @@ export const login = async (name, password) => {
     return { error: error.message || 'Something went wrong' };
   };
 }
-//fetch google login
-const handleGoogleLoginSuccess = async (response) => {
-  const res = await fetch('/api/auth/google-login', {
+//fetch googleLogin
+export const googleLogin = async (token) => {
+  try {
+    const res = await fetch('/api/auth/google-login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token: response.credential }) // This is the Google ID token
+    body: JSON.stringify({ token }) // This is the Google ID token
   });
 
   const data = await res.json();
@@ -63,6 +64,9 @@ const handleGoogleLoginSuccess = async (response) => {
   console.log('Google login token stored:', data.token);
 
   return data;
+  } catch (error) {
+    return { error: error.message || 'Unknown error during Google login' };
+  }
 
 };
 
