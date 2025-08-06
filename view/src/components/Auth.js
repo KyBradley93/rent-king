@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { register, login, googleLogin } from '../utils/index';
-
+import { useNavigate } from 'react-router-dom';
 
 const Auth = () => {
-    const [name, setName] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState();
-    const [response, setResponse] = useState();
+  console.log("Google Client ID:", process.env.REACT_APP_GOOGLE_CLIENT_ID);
 
-    const handleGoogleCredential = async (response) => {
+  const navigate = useNavigate();
+  const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState();
+  const [response, setResponse] = useState();
+
+  const handleGoogleCredential = useCallback(async (response) => {
     if (!response.credential) {
       setError('No Google credential received.');
       return;
@@ -20,9 +23,12 @@ const Auth = () => {
       setError(res.error);
     } else {
       setResponse(res);
+      localStorage.setItem('token', res.token);
+      navigate('/products');
     }
-  };
+  }, [navigate]);
 
+  
   const handleRegister = async (e) => {
     e.preventDefault();
     const res = await register(name, password);
@@ -30,6 +36,8 @@ const Auth = () => {
       setError(res.error);
     } else {
       setResponse(res);
+      localStorage.setItem('token', res.token);
+      navigate('/products');
     }
   };
 
@@ -40,36 +48,38 @@ const Auth = () => {
       setError(res.error);
     } else {
       setResponse(res);
+      localStorage.setItem('token', res.token);
+      navigate('/products');
     }
   };
 
 
-    useEffect(() => {
+  useEffect(() => {     
     const loadGoogleScript = () => {
-        const script = document.createElement('script');
-        script.src = 'https://accounts.google.com/gsi/client';
-        script.async = true;
-        script.defer = true;
-        script.onload = () => {
-      /* global google */
-            if (window.google) {
-                google.accounts.id.initialize({
-                    client_id: process.env.GOOGLE_CLIENT_ID,
-                    callback: handleGoogleCredential,
-                });
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.onload = () => {
+        /* global google */
+        if (window.google) {
+          google.accounts.id.initialize({
+          client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+          callback: handleGoogleCredential,
+        });
 
-            google.accounts.id.renderButton(
-                    document.getElementById('g_id_signin'),
-                    { theme: 'outline', size: 'large' }
-                );
-            }
+        google.accounts.id.renderButton(
+          document.getElementById('g_id_signin'),
+          { theme: 'outline', size: 'large' }
+        );
+      }
 
-        };
+      };
         document.body.appendChild(script);
     };
 
     loadGoogleScript();
-}, []);
+}, [handleGoogleCredential]);
 
     
     
@@ -119,3 +129,5 @@ const Auth = () => {
         </div>
     );
 };
+
+export default Auth;

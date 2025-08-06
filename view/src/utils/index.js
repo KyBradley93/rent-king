@@ -15,12 +15,19 @@ export const  = async () => {
 //fetch register
 export const register = async (name, password) => {
   try {
-    const res = await fetch('/register', {
+    const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, password }),
     });
-    return res.json();
+    const data = await res.json();
+
+    if (data.token) {
+      localStorage.setItem('token', data.token);
+    }
+
+    return data;
+
     } catch (error) {
     return { error: error.message || 'Something went wrong' };
   };
@@ -28,10 +35,10 @@ export const register = async (name, password) => {
 //fetch login
 export const login = async (name, password) => {
   try {
-    const res = await fetch('/login', {
+    const res = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(name, password),
+        body: JSON.stringify({ name, password }),
     });
     
     const data = await res.json();
@@ -47,12 +54,12 @@ export const login = async (name, password) => {
   };
 }
 //fetch googleLogin
-export const googleLogin = async (token) => {
+export const googleLogin = async (response) => {
   try {
     const res = await fetch('/api/auth/google-login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token }) // This is the Google ID token
+    body: JSON.stringify({ response }) // This is the Google ID token
   });
 
   const data = await res.json();
@@ -70,10 +77,16 @@ export const googleLogin = async (token) => {
 
 };
 
+//logout
+
+export const logout = () => {
+  localStorage.removeItem('token');
+};
+
 //fetch products
 export const products = async () => {
     try {
-        const res = await fetch('/products');
+        const res = await fetch('/api/products');
         return res.json();
     } catch (error) {
         return { error: error.message || 'Something went wrong' };
@@ -82,7 +95,7 @@ export const products = async () => {
 //fetch products by furniture type
 export const productsByType = async (type) => {
     try {
-        const res = await fetch(`/products/:${type}`);
+        const res = await fetch(`/api/products/${type}`);
         return res.json();
     } catch (error) {
         return { error: error.message || 'Something went wrong' };
@@ -90,10 +103,17 @@ export const productsByType = async (type) => {
 }
 //fetch add to cart
 export const addToCart = async (furniture_item_id, quantity) => {
+  const token = localStorage.getItem('token'); // ✅ get token
+
+  if (!token) return { error: 'Not authenticated' };
+
     try {
         const res = await fetch('/cart/items', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}` 
+            },
             body: JSON.stringify({ furniture_item_id, quantity }),
         });
         return res.json();
@@ -109,7 +129,7 @@ export const fetchCart = async () => {
   if (!token) return { error: 'Not authenticated' };
 
   try {
-    const res = await fetch('/cart', {
+    const res = await fetch('/api/cart', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}` // ✅ send token
@@ -146,7 +166,7 @@ export const deleteFromCart = async (furniture_item_id) => {
 //fetch go to checkout
 export const goToCheckout = async (id) => {
     try {
-        const res = await fetch(`/checkout/:${id}`);
+        const res = await fetch(`/api/checkout/${id}`);
         return res.json();
     } catch (error) {
         return { error: error.message || 'Something went wrong' };
