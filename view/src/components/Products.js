@@ -31,7 +31,7 @@ const Products = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const res = products();
+                const res = await products();
 
                 if (res.error) {
                     setError(res.error);
@@ -48,8 +48,8 @@ const Products = () => {
 
     }, []);
     // products by furniture type
-     useEffect((type) => {
-        const fetchProductsByType = async (type) => {
+     useEffect(() => {
+        const fetchProductsByType = async () => {
             if(!type) {
                 setFilteredProducts(allProducts);
                 return;

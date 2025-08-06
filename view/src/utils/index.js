@@ -15,7 +15,7 @@ export const  = async () => {
 //fetch register
 export const register = async (name, password) => {
   try {
-    const res = await fetch('/api/register', {
+    const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, password }),
@@ -35,7 +35,7 @@ export const register = async (name, password) => {
 //fetch login
 export const login = async (name, password) => {
   try {
-    const res = await fetch('/api/login', {
+    const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, password }),
@@ -54,12 +54,12 @@ export const login = async (name, password) => {
   };
 }
 //fetch googleLogin
-export const googleLogin = async (response) => {
+export const googleLogin = async (idToken) => {
   try {
     const res = await fetch('/api/auth/google-login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ response }) // This is the Google ID token
+    body: JSON.stringify({ token: idToken }) // This is the Google ID token
   });
 
   const data = await res.json();
@@ -68,7 +68,7 @@ export const googleLogin = async (response) => {
     localStorage.setItem('token', data.token);
   }
 
-  console.log('Google login token stored:', data.token);
+  //console.log('Google login token stored:', data.token);
 
   return data;
   } catch (error) {
@@ -108,7 +108,7 @@ export const addToCart = async (furniture_item_id, quantity) => {
   if (!token) return { error: 'Not authenticated' };
 
     try {
-        const res = await fetch('/cart/items', {
+        const res = await fetch('/api/cart/items', {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json',
@@ -150,7 +150,7 @@ export const deleteFromCart = async (furniture_item_id) => {
 
 
     try {
-        const res = await fetch('/items', {
+        const res = await fetch('/api/cart/items', {
           method: 'DELETE',
           headers: { 
             'Content-Type': 'application/json',

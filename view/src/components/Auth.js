@@ -3,11 +3,13 @@ import { register, login, googleLogin } from '../utils/index';
 import { useNavigate } from 'react-router-dom';
 
 const Auth = () => {
-  console.log("Google Client ID:", process.env.REACT_APP_GOOGLE_CLIENT_ID);
+  //console.log("Google Client ID:", process.env.REACT_APP_GOOGLE_CLIENT_ID);
 
   const navigate = useNavigate();
-  const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
+  const [loginName, setLoginName] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [registerName, setRegisterName] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
   const [error, setError] = useState();
   const [response, setResponse] = useState();
 
@@ -31,19 +33,23 @@ const Auth = () => {
   
   const handleRegister = async (e) => {
     e.preventDefault();
-    const res = await register(name, password);
+    const res = await register(registerName, registerPassword);
     if (res.error) {
       setError(res.error);
+      console.log(error);
     } else {
       setResponse(res);
       localStorage.setItem('token', res.token);
-      navigate('/products');
+      setRegisterName('');
+      setRegisterPassword('');
+      navigate('/');
+      alert('Register Succesful. Log In Bitch');
     }
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const res = await login(name, password);
+    const res = await login(loginName, loginPassword);
     if (res.error) {
       setError(res.error);
     } else {
@@ -92,34 +98,36 @@ const Auth = () => {
                 <input
                     type="text"
                     name="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    value={registerName}
+                    onChange={(e) => setRegisterName(e.target.value)}
                 >
                 </input>
                 <input
                     type="text"
                     name="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={registerPassword}
+                    onChange={(e) => setRegisterPassword(e.target.value)}
                 >
                 </input>
+                <button type="submit">Register</button>
             </form>
             <h2>Login</h2>
             <form onSubmit={handleLogin}>
                 <input
                     type="text"
                     name="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    value={loginName}
+                    onChange={(e) => setLoginName(e.target.value)}
                 >
                 </input>
                 <input
                     type="text"
                     name="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
                 >
                 </input>
+                <button type="submit">Login</button>
             </form>
             <h2>Google Login</h2>
             <div id="g_id_signin" style={{ marginTop: '20px' }}></div>

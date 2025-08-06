@@ -167,7 +167,7 @@ router.delete('/items', authenticateCustomer, async (req, res) => {
      'DELETE FROM cart_items WHERE cart_id = $1 AND furniture_item_id = $2',
     [cartId, furniture_item_id]
   );
-  res.status(200).json({ message: 'Item deletd from cart' });
+  res.status(200).json({ message: 'Item deleted from cart' });
 });
 
 module.exports = router;

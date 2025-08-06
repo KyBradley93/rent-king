@@ -41,6 +41,9 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 router.post('/register', async (req, res) => {
   const { name, password } = req.body;
   try {
+    console.log('fuck');
+    console.log(`name: ${name}`);
+    console.log(`password: ${password}`);
     const userCheck = await pool.query('SELECT * FROM customers WHERE name = $1', [name]);
     if (userCheck.rows.length > 0) return res.status(400).json({ error: 'Customer already exists' });
 
@@ -149,7 +152,7 @@ router.post('/google-login', async (req, res) => {
     const payload = ticket.getPayload();
     const { sub: googleId, email, name } = payload;
 
-    let user = await pool.query('SELECT * FFROM customers WHERE google_id = $1', [googleId]);
+    let user = await pool.query('SELECT * FROM customers WHERE google_id = $1', [googleId]);
 
     if (user.rows.length == 0) {
       await pool.query('INSERT INTO customers (name, email, google_id) VALUES ($1, $2, $3)', [name, email, googleId]);
