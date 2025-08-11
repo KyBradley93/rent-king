@@ -7,3 +7,5 @@ const pool = new Pool({
 });
 
 module.exports = pool;
+
+// postgresql://rent_king_db_user:uj4js5HLenfGOWV0ogPY4L8DfVAXNcMS@dpg-d2crbb9r0fns73e7i05g-a.oregon-postgres.render.com/rent_king_db
