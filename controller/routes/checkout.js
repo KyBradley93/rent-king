@@ -35,13 +35,16 @@ const authenticateCustomer = require('../../middleware/auth');
 
 
 router.post('/', authenticateCustomer, async (req, res) => {
+  //found by authenticateCustomer
   const customerId = req.customer.id;
 
+  //finds cart id
   const cartRes = await pool.query('SELECT id FROM cart WHERE customer_id = $1', [customerId]);
   if (cartRes.rows.length === 0) return res.status(400).json({ error: 'No cart found' });
 
   const cartId = cartRes.rows[0].id;
 
+  //triggers db function that will update checkout and checkout_items db
   try {
     const result = await pool.query('SELECT finalize_checkout($1, $2) AS checkout_id', [cartId, customerId]);
     res.status(201).json({ message: 'Checkout successful', checkout_id: result.rows[0].checkout_id });
@@ -115,8 +118,13 @@ router.post('/', authenticateCustomer, async (req, res) => {
 
 
 router.get('/:id', authenticateCustomer, async (req, res) => {
+  //console.log('🧪 Authenticated customer ID:', req.customer?.id);
+  //console.log('🧪 Requesting checkout ID:', req.params.id);
   const checkoutId = req.params.id;
 
+  //console.log(`Fetching checkout ID ${checkoutId} for customer ${req.customer.id}`);
+
+  //finds checkout data in db to display by checkout id and customer id
   const result = await pool.query(`
     SELECT c.id AS checkout_id, c.total_price, c.created_at,
            ci.furniture_item_id, af.name, ci.quantity, ci.unit_price
@@ -125,6 +133,10 @@ router.get('/:id', authenticateCustomer, async (req, res) => {
     JOIN all_furniture af ON ci.furniture_item_id = af.id
     WHERE c.id = $1 AND c.customer_id = $2
   `, [checkoutId, req.customer.id]);
+
+  if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Checkout not found' });
+    }
 
   res.json(result.rows);
 });

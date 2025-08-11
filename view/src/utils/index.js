@@ -13,15 +13,24 @@ export const  = async () => {
 
 
 //fetch register
+
+//need to match async with the req.body in router
 export const register = async (name, password) => {
   try {
+    //fetch must match routes properly, consider hierarchy tree of routes
     const res = await fetch('/api/auth/register', {
+      //must match what router says
         method: 'POST',
+      //idk often needed
         headers: { 'Content-Type': 'application/json' },
+      //router can only read json I think
         body: JSON.stringify({ name, password }),
     });
+
+    //collects register data and turns it into json
     const data = await res.json();
 
+    //sets up "token" for authorization
     if (data.token) {
       localStorage.setItem('token', data.token);
     }
@@ -80,6 +89,7 @@ export const googleLogin = async (idToken) => {
 //logout
 
 export const logout = () => {
+  //deletes token
   localStorage.removeItem('token');
 };
 
@@ -103,7 +113,8 @@ export const productsByType = async (type) => {
 }
 //fetch add to cart
 export const addToCart = async (furniture_item_id, quantity) => {
-  const token = localStorage.getItem('token'); // ✅ get token
+  //need to have "token" if router has authenticateCustomer middleware
+  const token = localStorage.getItem('token'); // ✅ gets token
 
   if (!token) return { error: 'Not authenticated' };
 
@@ -112,6 +123,7 @@ export const addToCart = async (furniture_item_id, quantity) => {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json',
+              //says you have permission
               'Authorization': `Bearer ${token}` 
             },
             body: JSON.stringify({ furniture_item_id, quantity }),
@@ -156,7 +168,7 @@ export const deleteFromCart = async (furniture_item_id) => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}` 
           },
-            body: JSON.stringify({ furniture_item_id }),
+          body: JSON.stringify({ furniture_item_id })
         });
         return res.json();
     } catch (error) {
@@ -165,15 +177,50 @@ export const deleteFromCart = async (furniture_item_id) => {
 }   
 //fetch go to checkout
 export const goToCheckout = async (id) => {
+  const token = localStorage.getItem('token');
+  
     try {
-        const res = await fetch(`/api/checkout/${id}`);
-        return res.json();
+        const res = await fetch(`/api/checkout/${id}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!res.ok) {
+            const text = await res.text();
+            return { error: `Request failed: ${res.status} - ${text}` };
+        }
+
+        return await res.json();
     } catch (error) {
         return { error: error.message || 'Something went wrong' };
   }
 }
 //fetch checkout
+export const checkout = async (cartItems, totalPrice) => {
+  const token = localStorage.getItem('token');
 
+  if (!token) return { error: 'Not authenticated' };
+
+  try {
+    const res = await fetch('http://localhost:5001/api/payment', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ 
+              items: cartItems,
+              total_price: totalPrice,
+            }),
+        });
+
+    return res.json();
+
+  } catch (err) {
+    return { error: err.message || 'Something went wrong' };
+  }
+}
 //fetch insert stripe logic
 
 //fetch finalize checkout

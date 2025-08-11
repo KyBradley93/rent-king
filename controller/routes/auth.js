@@ -41,9 +41,10 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 router.post('/register', async (req, res) => {
   const { name, password } = req.body;
   try {
-    console.log('fuck');
-    console.log(`name: ${name}`);
-    console.log(`password: ${password}`);
+    //console.log('fuck');
+    //console.log(`name: ${name}`);
+    //console.log(`password: ${password}`);
+
     const userCheck = await pool.query('SELECT * FROM customers WHERE name = $1', [name]);
     if (userCheck.rows.length > 0) return res.status(400).json({ error: 'Customer already exists' });
 
@@ -104,10 +105,10 @@ router.post('/login', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM customers WHERE name = $1', [name]);
     const customer = result.rows[0];
-    if (!customer) return res.status(400).json({ error: 'Invalid name or password' });
+    if (!customer) return res.status(400).json({ error: 'Invalid name' });
 
     const isValid = await bcrypt.compare(password, customer.password);
-    if (!isValid) return res.status(400).json({ error: 'Invalid name or password' });
+    if (!isValid) return res.status(400).json({ error: 'Invalid password' });
 
     const token = jwt.sign({ id: customer.id, name: customer.name }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({ message: 'Login successful', token });

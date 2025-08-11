@@ -99,9 +99,11 @@ router.get('/', authenticateCustomer, async (req, res) => {
 router.post('/items', authenticateCustomer, async (req, res) => {
   const { furniture_item_id, quantity } = req.body;
 
-  // Ensure cart exists
+  // Ensure users cart exists
   let cartResult = await pool.query('SELECT * FROM cart WHERE customer_id = $1', [req.customer.id]);
   let cartId;
+
+  //makes new cart id if user has no cart
   if (cartResult.rows.length === 0) {
     const newCart = await pool.query('INSERT INTO cart (customer_id) VALUES ($1) RETURNING id', [req.customer.id]);
     cartId = newCart.rows[0].id;
@@ -154,7 +156,7 @@ router.post('/items', authenticateCustomer, async (req, res) => {
 router.delete('/items', authenticateCustomer, async (req, res) => {
   const { furniture_item_id } = req.body;
 
-  // Ensure cart exists
+  // finds cart id
   let cartResult = await pool.query('SELECT * FROM cart WHERE customer_id = $1', [req.customer.id]);
   let cartId;
   if (cartResult.rows.length === 0) {

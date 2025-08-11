@@ -1,29 +1,35 @@
 import React from 'react';
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Auth from './components/Auth';
 import Products from './components/Products';
+import Cart from './components/Cart';
+import Checkout from './components/Checkout';
 import ProtectedRoute from './components/ProtectedRoute';
 
 
 export const App = () => {
     return (
         <>
-            <nav>
-                <ul>
-                    <li><Link to="/">Login</Link></li>
-                    <li><Link to="/products">Products</Link></li>
-                </ul>
-
-            </nav>
-
             <Routes>
                 <Route path='/' element={<Auth />}/>
                 <Route path='/products' 
-                element={
-                    <ProtectedRoute>
-                        <Products />
-                    </ProtectedRoute>
-                } />
+                    element={
+                        <ProtectedRoute>
+                            <Products />
+                        </ProtectedRoute>
+                    } />
+                <Route path='/cart' 
+                    element={
+                        <ProtectedRoute>
+                            <Cart />
+                        </ProtectedRoute>
+                    } />
+                <Route path='/success' 
+                    element={
+                        <ProtectedRoute>
+                            <Checkout />
+                        </ProtectedRoute>
+                    } />
             </Routes>
 
         </>

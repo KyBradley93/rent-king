@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { products, productsByType, addToCart } from '../utils/index';  //add fetchCart
+import { products, productsByType, addToCart } from '../utils/index'; 
+import { useNavigate } from 'react-router-dom';
 
 const Products = () => {
+    const navigate = useNavigate();
     const [allProducts, setAllProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [type, setType] = useState('');
@@ -15,17 +17,21 @@ const Products = () => {
 
         if (res.error) {
             setError(res.error);
-        }; 
+        };
+        
+        alert('Item added');
     };
 
     // go to cart
-    /*const handleFetchCart = async () => {
-        const res = await fetchCart();
+    const handleGoToCart = async () => {
+        navigate('/cart');
+    };
 
-        if (res.error) {
-            setError(res.error);
-        }
-    };*/
+    //logout
+
+    const handleLogOut = async () => {
+        navigate('/');
+    };
 
     // products
     useEffect(() => {
@@ -76,10 +82,10 @@ const Products = () => {
     
     return (
         <div>
-            <h1>fuck</h1>
+            <h1>CLICK BUTTON TO ADD TO YOUR CART</h1>
             <h2>Products</h2>
             <select value={type} onChange={(e) => setType(e.target.value)}>
-                <option>--Select--</option>
+                <option value="">All Furniture</option>
                 <option value="beds">Beds</option>
                 <option value="night_stands">Night Stands</option>
                 <option value="dressers">Dressers</option>
@@ -98,6 +104,8 @@ const Products = () => {
                     </li>
                 ))}
             </ul>
+            <button onClick={handleGoToCart}>Go To Cart</button>
+            <button onClick={handleLogOut}>Log Out</button>
             
         </div>
         

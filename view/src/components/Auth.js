@@ -13,24 +13,28 @@ const Auth = () => {
   const [error, setError] = useState();
   const [response, setResponse] = useState();
 
+    //waits for response, this is to match info for google to verify you
   const handleGoogleCredential = useCallback(async (response) => {
+
     if (!response.credential) {
       setError('No Google credential received.');
       return;
     }
-
+    //starts google login
     const res = await googleLogin(response.credential);
 
     if (res.error) {
       setError(res.error);
     } else {
       setResponse(res);
+      //sets "token"
       localStorage.setItem('token', res.token);
+      //sends you to product page
       navigate('/products');
     }
   }, [navigate]);
 
-  
+  //waits for click
   const handleRegister = async (e) => {
     e.preventDefault();
     const res = await register(registerName, registerPassword);
@@ -40,9 +44,13 @@ const Auth = () => {
     } else {
       setResponse(res);
       localStorage.setItem('token', res.token);
+
+      //resets page
       setRegisterName('');
       setRegisterPassword('');
       navigate('/');
+
+
       alert('Register Succesful. Log In Bitch');
     }
   };
@@ -60,20 +68,25 @@ const Auth = () => {
   };
 
 
-  useEffect(() => {     
+  useEffect(() => { 
+    //I guess this makes a html element that google uploads to your page like the logo you click on I think?    
     const loadGoogleScript = () => {
       const script = document.createElement('script');
       script.src = 'https://accounts.google.com/gsi/client';
       script.async = true;
       script.defer = true;
       script.onload = () => {
+
+
         /* global google */
+        //connects to google in background?
         if (window.google) {
           google.accounts.id.initialize({
           client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
           callback: handleGoogleCredential,
         });
 
+        //makes button if everything works accordingly
         google.accounts.id.renderButton(
           document.getElementById('g_id_signin'),
           { theme: 'outline', size: 'large' }
@@ -81,6 +94,7 @@ const Auth = () => {
       }
 
       };
+      //inserts button to app
         document.body.appendChild(script);
     };
 
@@ -92,7 +106,7 @@ const Auth = () => {
     
     return (
         <div>
-            <h1>fuck</h1>
+            <h1>ROOS FURNITURE STORE</h1>
             <h2>Register</h2>
             <form onSubmit={handleRegister}>
                 <input
@@ -103,7 +117,7 @@ const Auth = () => {
                 >
                 </input>
                 <input
-                    type="text"
+                    type="password"
                     name="password"
                     value={registerPassword}
                     onChange={(e) => setRegisterPassword(e.target.value)}
@@ -121,7 +135,7 @@ const Auth = () => {
                 >
                 </input>
                 <input
-                    type="text"
+                    type="password"
                     name="password"
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
